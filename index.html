@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusSearch | Name Search Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6E48FF;
+            --primary-dark: #5629E0;
+            --dark: #1A1A2E;
+            --light: #F8F9FF;
+            --gray: #E2E4F0;
+            --success: #00C897;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            padding: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            height: 60px;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 0 1.5rem;
+            font-size: 1.1rem;
+            border: 2px solid var(--gray);
+            border-radius: 12px 0 0 12px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            border-color: var(--primary);
+        }
+
+        #searchButton {
+            width: 140px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 0 12px 12px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #searchButton:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .search-tips {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-tip {
+            background: var(--gray);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-tip:hover {
+            background: #D6D9E8;
+        }
+
+        #results {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.15);
+        }
+
+        .result-title {
+            color: var(--dark);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        .result-title:hover {
+            color: var(--primary);
+        }
+
+        .result-url {
+            color: var(--success);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-url::before {
+            content: "";
+            display: block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--success);
+            border-radius: 50%;
+        }
+
+        .result-snippet {
+            color: #64748B;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(110, 72, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: #EF4444;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: #64748B;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .search-box {
+                height: 50px;
+            }
+            
+            #searchInput {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+            
+            #searchButton {
+                width: 100px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">p</div>
+            <h1>Search</h1>
+        </div>
+        <p class="subtitle">Find web results for any name</p>
+    </header>
+
+    <main class="search-container glass-card">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Enter a name (e.g. 'John Doe')" autofocus>
+            <button id="searchButton">
+                <span>Search</span>
+            </button>
+        </div>
+        <div class="search-tips">
+            <div class="search-tip" data-search="Elon Musk">Elon Musk</div>
+            <div class="search-tip" data-search="Taylor Swift">Taylor Swift</div>
+            <div class="search-tip" data-search="Satya Nadella">Satya Nadella</div>
+            <div class="search-tip" data-search="Serena Williams">Serena Williams</div>
+        </div>
+    </main>
+
+    <div id="results"></div>
+
+    <footer>
+        <p>mabe by pawan</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const resultsDiv = document.getElementById('results');
+        const searchTips = document.querySelectorAll('.search-tip');
+
+        // Event Listeners
+        searchButton.addEventListener('click', searchName);
+        searchInput.addEventListener('keypress', (e) => e.key === 'Enter' && searchName());
+        
+        searchTips.forEach(tip => {
+            tip.addEventListener('click', () => {
+                searchInput.value = tip.getAttribute('data-search');
+                searchName();
+            });
+        });
+
+        // Main Search Function
+        async function searchName() {
+            const name = searchInput.value.trim();
+            if (!name) return;
+
+            // Show loading state
+            resultsDiv.innerHTML = `
+                <div class="loading glass-card">
+                    <div class="spinner"></div>
+                    <p>Searching the web for "${name}"...</p>
+                </div>
+            `;
+
+            try {
+                // In a real app, replace with actual API call to your backend
+                const searchResults = await mockSearchAPI(name);
+                displayResults(searchResults);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error-message glass-card">
+                        <p>⚠️ Error: ${error.message}</p>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display Results
+        function displayResults(results) {
+            if (!results || results.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="error-message glass-card">
+                        <p>No results found for "${searchInput.value}"</p>
+                        <p>Try a different name or check spelling</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            results.forEach(result => {
+                html += `
+                <div class="result-item glass-card">
+                    <a href="${result.link}" class="result-title" target="_blank">${result.title}</a>
+                    <div class="result-url">${result.displayLink}</div>
+                    <p class="result-snippet">${result.snippet}</p>
+                </div>
+                `;
+            });
+            resultsDiv.innerHTML = html;
+        }
+
+        // Mock API (Replace with real backend in production)
+        function mockSearchAPI(name) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const mockResults = generateMockResults(name);
+                    resolve(mockResults);
+                }, 1500); // Simulate network delay
+            });
+        }
+
+        function generateMockResults(name) {
+            const domains = [
+                'linkedin.com', 
+                'wikipedia.org', 
+                'twitter.com', 
+                'forbes.com', 
+                'youtube.com'
+            ];
+            
+            const professions = [
+                'entrepreneur', 
+                'software engineer', 
+                'actor', 
+                'musician', 
+                'scientist'
+            ];
+            
+            const roles = [
+                'founder and CEO', 
+                'lead developer', 
+                'award-winning', 
+                'world-renowned', 
+                'pioneering'
+            ];
+            
+            return Array.from({ length: 5 }, (_, i) => {
+                const domain = domains[i % domains.length];
+                return {
+                    title: `${name} - ${domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1)}`,
+                    link: `https://www.${domain}/${name.toLowerCase().replace(' ', '-')}`,
+                    displayLink: domain,
+                    snippet: `${name} is a ${roles[i % roles.length]} ${professions[i % professions.length]} known for ${[
+                        'their groundbreaking work in technology',
+                        'multiple award-winning performances',
+                        'contributions to open source software',
+                        'best-selling publications',
+                        'innovative research'
+                    ][i % 5]}.`
+                };
+            });
+        }
+    </script>
+</body>
+</html>
